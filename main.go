@@ -14,7 +14,9 @@ var (
 	TokenFile string
 	Token     string
 	Version   string
-	OwnName string
+	OwnName   string
+	Debug     bool
+	DevSrvID  string
 )
 
 // TODO move stuff to proper config file
@@ -23,8 +25,10 @@ func init() {
 	flag.Parse()
 	// Read the token from supplied file
 	Token = read(TokenFile)
+	DevSrvID = read("config") // TODO sloppy..
 	Version = "0.1"
 	OwnName = "Ragequitter"
+	Debug = true
 }
 
 var buffer = make([][]byte, 0)
@@ -43,9 +47,7 @@ func main() {
 
 	// Register ready as a callback for the ready events.
 	discord.AddHandler(ready)
-
 	discord.AddHandler(messageCreate)
-
 	// Register guildCreate as a callback for the guildCreate events.
 	discord.AddHandler(guildCreate)
 
@@ -56,7 +58,6 @@ func main() {
 		return
 	}
 
-
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
@@ -66,7 +67,6 @@ func main() {
 	// Cleanly close down the discord session.
 	discord.Close()
 }
-
 
 // This function will be called when the bot receives
 // the "ready" event from Discord.
@@ -85,7 +85,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-    simpleReplyText := ParseCommand(m)
+	simpleReplyText := ParseCommand(m)
 
 	if simpleReplyText != "" {
 		s.ChannelMessageSend(m.ChannelID, simpleReplyText)
@@ -98,6 +98,10 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 		return
 	}
 
+	if !isOnDevelopmentServer(event.Guild.ID) && Debug {
+		// Avoid spamming other servers when testing
+		return
+	}
 	for _, channel := range event.Guild.Channels {
 		if channel.ID == event.Guild.ID {
 			_, _ = s.ChannelMessageSend(channel.ID, "Χαίρετε :smile:")
@@ -105,4 +109,8 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 			return
 		}
 	}
+}
+
+func isOnDevelopmentServer(serverId string) bool {
+	return DevSrvID == serverId
 }
