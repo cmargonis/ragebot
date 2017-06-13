@@ -7,20 +7,24 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"strings"
 )
 
 // Variables used for command line parameters
 var (
 	TokenFile string
 	Token     string
+	Version   string
+	OwnName string
 )
 
+// TODO move stuff to proper config file
 func init() {
 	flag.StringVar(&TokenFile, "t", "", "Bot Token file")
 	flag.Parse()
 	// Read the token from supplied file
 	Token = read(TokenFile)
+	Version = "0.1"
+	OwnName = "Ragequitter"
 }
 
 var buffer = make([][]byte, 0)
@@ -52,6 +56,7 @@ func main() {
 		return
 	}
 
+
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
@@ -67,64 +72,23 @@ func main() {
 // the "ready" event from Discord.
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	// Set the playing status
-	s.UpdateStatus(0, "!airhorn")
-
+	s.UpdateStatus(0, "Σας παρακολουθώ")
 }
+
 // This function will be called (since we register it as a Handler)
 // every time a new message is created on any channel that the authenticated bot
 // has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	fmt.Println("received message: ", m.Content)
-
-	message := strings.ToLower(m.Content)
-
 	// Ignore all messages created by the bot itself
 	// This isn't required but it's a good practice.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	if strings.Contains(message, "καλημέρα") {
-		s.ChannelMessageSend(m.ChannelID, "Καλημέρα " + m.Author.Mention() + " :sunny:")
-	}
+    simpleReplyText := ParseCommand(m)
 
-	if strings.Contains(message, "help") {
-		s.ChannelMessageSend(m.ChannelID, "Μπορώ να κάνω γενικά λίγα πράγματα προς το παρόν :sob:")
-	}
-
-	if strings.HasPrefix(message, "!ping") {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-
-	if strings.HasPrefix(message, "!pong") {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-
-	if strings.HasPrefix(message, "!airhorn") {
-		// Find the channel that the message came from.
-		c, err := s.State.Channel(m.ChannelID)
-		if err != nil {
-			// Could not find channel
-			return
-		}
-
-		// Find the guild for that channel.
-		g, err := s.State.Guild(c.GuildID)
-		if err != nil {
-			// Could not find guild
-			return
-		}
-
-		// Look for the message sender in that guild's current voice states.
-		for _, vs := range g.VoiceStates {
-			if vs.UserID == m.Author.ID {
-				err = playSound(s, g.ID, vs.ChannelID, buffer)
-				if err != nil {
-					fmt.Println("Error playing sound: ", err)
-				}
-				return
-			}
-		}
+	if simpleReplyText != "" {
+		s.ChannelMessageSend(m.ChannelID, simpleReplyText)
 	}
 }
 
@@ -136,7 +100,8 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 
 	for _, channel := range event.Guild.Channels {
 		if channel.ID == event.Guild.ID {
-			_, _ = s.ChannelMessageSend(channel.ID, "Airhorn is read! Type !airhorn while in a voice channel to play a sound!")
+			_, _ = s.ChannelMessageSend(channel.ID, "Χαίρετε :smile:")
+			s.GuildMemberNickname(event.Guild.ID, "@me", OwnName)
 			return
 		}
 	}

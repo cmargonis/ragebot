@@ -9,6 +9,33 @@ import (
 	"time"
 )
 
+func PlayAirhorn(s *discordgo.Session, m *discordgo.MessageCreate) {
+	// Find the channel that the message came from.
+	c, err := s.State.Channel(m.ChannelID)
+	if err != nil {
+		// Could not find channel
+		return
+	}
+
+	// Find the guild for that channel.
+	g, err := s.State.Guild(c.GuildID)
+	if err != nil {
+		// Could not find guild
+		return
+	}
+
+	// Look for the message sender in that guild's current voice states.
+	for _, vs := range g.VoiceStates {
+		if vs.UserID == m.Author.ID {
+			err = playSound(s, g.ID, vs.ChannelID, buffer)
+			if err != nil {
+				fmt.Println("Error playing sound: ", err)
+			}
+			return
+		}
+	}
+}
+
 func loadSound(buffer *[][]byte) (error) {
 	file, err := os.Open("assets/airhorn.dca")
 	if err != nil {
@@ -54,7 +81,7 @@ func loadSound(buffer *[][]byte) (error) {
 // plays the current buffer to the provided channel.
 func playSound(s *discordgo.Session, guildID, channelID string, buffer [][]byte) (err error) {
 	// Join the provided channel
-	vc, err := s.ChannelVoiceJoin(guildID, channelID, false,true)
+	vc, err := s.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
 		return err
 	}
