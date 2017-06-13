@@ -89,6 +89,6 @@ func assembleHelpText() string {
 		help = help + fmt.Sprintln("`"+key+"`:", value.Help)
 	}
 
-	help = help + fmt.Sprintln("Μπορώ να κάνω γενικά λίγα πράγματα προς το παρόν :sob:")
+	help = help + fmt.Sprintln("Μπορώ να κάνω γενικά λίγα πράγματα προς το παρόν :sob:\n\nΜπορείτε να δείτε πώς δουλεύω στο: https://github.com/cmargonis/ragebot")
 	return help
 }
