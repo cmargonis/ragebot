@@ -4,6 +4,7 @@ import (
 	"strings"
 	"github.com/bwmarrin/discordgo"
 	"fmt"
+	"time"
 )
 
 type Command struct {
@@ -20,9 +21,11 @@ func init() {
 
 	registerCommand("!help", "Αυτό το μήνυμα με οδηγίες", false, "", []string{"!βοήθεια", "!βοηθεια"})
 	registerCommand("!ping", "Απαντά με πόνγκ!", true, "Pong!", nil)
-	registerCommand("καλημέρα", "Το ευγενικό bot λέει και αυτό καλημέρα", true, "Καλημέρα %s :sunrise:", []string{"καλημερα", "καλημέρες", "καλημερες"})
-	registerCommand("καλησπέρα", "Το ευγενικό bot λέει και αυτό καλησπέρα", true, "Καλησπέρα %s :city_sunset:", []string{"καλησπερα", "καλησπέρες", "καλησπερες"})
+	registerCommand("καλημέρα", "Το ευγενικό bot λέει και αυτό καλημέρα", false, "Καλημέρα %s :sunrise:", []string{"καλημερα", "καλημέρες", "καλημερες", "goodmorning"})
+	registerCommand("καλησπέρα", "Το ευγενικό bot λέει και αυτό καλησπέρα", false, "Καλησπέρα %s :city_sunset:", []string{"καλησπερα", "καλησπέρες", "καλησπερες"})
+	registerCommand("καληνύχτα", "Το ευγενικό bot λέει και αυτό καληνύχτα", false, "Καληνύχτα %s :last_quarter_moon_with_face: :night_with_stars:", []string{"καληνυχτα", "νυχτααα", "καληνύχτες", "goodnight"})
 	registerCommand("!flip", "Όταν είσαι οργισμένος..", true, "(╯°□°）╯︵ ┻━┻", nil)
+	registerCommand("!review", "Search στα reviews.. επικίνδυνο..", false, "", nil)
 }
 
 // Used apparently to register a command.
@@ -77,9 +80,47 @@ func complexReply(m *discordgo.MessageCreate, c Command, operator string) (strin
 	switch operator {
 	case "!help":
 		return assembleHelpText()
+	case "καλημέρα":
+		return assembleGmText(m, c)
+	case "καλησπέρα":
+		return assembleGEText(m, c)
+	case "καληνύχτα":
+		return assembleGnText(m, c)
+	case "!review":
+		return assembleReviewText(m, c)
 	default:
 		return ""
 	}
+}
+
+func assembleGnText(m *discordgo.MessageCreate, c Command) string {
+	h := time.Now().Hour()
+	if h >= 5 && h <= 21 {
+		// should I really say goodnight?
+		c.ReplyText = "Μη με τρολλάρεις %s :sob:"
+	}
+
+	return simpleReply(m, c)
+}
+
+func assembleGmText(m *discordgo.MessageCreate, c Command) string {
+	h := time.Now().Hour()
+	if h >= 12 && h <= 23 {
+		// not really morning..
+		c.ReplyText = "Καλημέρα τέτοια ώρα;;!!"
+	}
+
+	return simpleReply(m, c)
+}
+
+func assembleGEText(m *discordgo.MessageCreate, c Command) string {
+	h := time.Now().Hour()
+	if h >= 0 && h <= 11 {
+		// not really evening..
+		c.ReplyText = "Καλημέρα λέει ο κόσμος.. τι timezone είσαι %s;"
+	}
+
+	return simpleReply(m, c)
 }
 
 func assembleHelpText() string {
@@ -89,6 +130,28 @@ func assembleHelpText() string {
 		help = help + fmt.Sprintln("`"+key+"`:", value.Help)
 	}
 
-	help = help + fmt.Sprintln("Μπορώ να κάνω γενικά λίγα πράγματα προς το παρόν :sob:\n\nΜπορείτε να δείτε πώς δουλεύω στο: https://github.com/cmargonis/ragebot")
+	help = help + fmt.Sprintf("Μπορώ να κάνω γενικά λίγα πράγματα προς το παρόν :sob:\n\nΜπορείτε να δείτε πώς δουλεύω στο: https://github.com/cmargonis/ragebot\n\nΤο spamming κλειδώνει το bot για %d δευτερόλεπτα", LockFor)
 	return help
+}
+
+func assembleReviewText(m *discordgo.MessageCreate, c Command) string {
+	rqPrefix := "http://ragequit.gr/reviews/item/"
+	rqPostfix := "pc-review"
+	originalMessage := strings.ToLower(m.Content)
+	items := strings.Split(originalMessage, " ")
+	urlReview := rqPrefix
+	startReading := false
+	for i := 0; i < len(items); i++ {
+		// fast forward until after the command
+		if !startReading && items[i] == "!review" {
+			startReading = true
+			continue
+		}
+		if startReading {
+			urlReview = urlReview + items[i] + "-"
+		}
+	}
+	urlReview = urlReview + rqPostfix
+	c.ReplyText = urlReview
+	return simpleReply(m, c)
 }

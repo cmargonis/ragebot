@@ -84,6 +84,18 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
+	c, err := s.Channel(m.ChannelID)
+	if err != nil {
+		return
+	}
+	if !isOnDevelopmentServer(c.GuildID) && Debug {
+		// do not send messages when in development mode
+		return
+	}
+
+	if !ShouldSend(c.GuildID) {
+		return
+	}
 
 	simpleReplyText := ParseCommand(m)
 
@@ -111,6 +123,6 @@ func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	}
 }
 
-func isOnDevelopmentServer(serverId string) bool {
-	return DevSrvID == serverId
+func isOnDevelopmentServer(guildId string) bool {
+	return DevSrvID == guildId
 }
