@@ -26,9 +26,14 @@ func init() {
 	// Read the token from supplied file
 	Token = read(TokenFile)
 	DevSrvID = read("config") // TODO sloppy..
-	Version = "0.1"
+	Version = "0.2"
 	OwnName = "Ragequitter"
 	Debug = true
+
+	// set error logging file
+	logFile, _ := os.OpenFile("./ragebot.err", os.O_WRONLY | os.O_CREATE | os.O_SYNC, 0755)
+	syscall.Dup2(int(logFile.Fd()), 1)
+	syscall.Dup2(int(logFile.Fd()), 2)
 }
 
 var buffer = make([][]byte, 0)
@@ -93,13 +98,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if !ShouldSend(c.GuildID) {
-		return
-	}
 
 	simpleReplyText := ParseCommand(m)
 
-	if simpleReplyText != "" {
+	if simpleReplyText != "" && ShouldSend(c.GuildID) {
 		s.ChannelMessageSend(m.ChannelID, simpleReplyText)
 	}
 }

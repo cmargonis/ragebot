@@ -16,3 +16,4 @@
 # Discord token file
 token
 config
+*.err

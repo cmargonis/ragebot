@@ -2,7 +2,7 @@ package main
 
 import (
 	"time"
-	_"fmt"
+	"fmt"
 )
 
 type SendEvent struct {
@@ -21,6 +21,7 @@ func init() {
 }
 
 func ShouldSend(guildId string) bool {
+	fmt.Println("Incoming message in: ", guildId)
 	lastEvent, ok := sendevents[guildId]
 
 	if !ok {
