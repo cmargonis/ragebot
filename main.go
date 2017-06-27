@@ -26,14 +26,21 @@ func init() {
 	// Read the token from supplied file
 	Token = read(TokenFile)
 	DevSrvID = read("config") // TODO sloppy..
-	Version = "0.2"
-	OwnName = "Ragequitter"
+	Version = "0.2.5"
 	Debug = true
 
+	if Debug {
+		OwnName = "Ragequitter - Test"
+	} else {
+		OwnName = "Ragequitter"
+	}
+
 	// set error logging file
-	logFile, _ := os.OpenFile("./ragebot.err", os.O_WRONLY | os.O_CREATE | os.O_SYNC, 0755)
-	syscall.Dup2(int(logFile.Fd()), 1)
-	syscall.Dup2(int(logFile.Fd()), 2)
+	if !Debug {
+		logFile, _ := os.OpenFile("./ragebot.err", os.O_WRONLY|os.O_CREATE|os.O_SYNC, 0755)
+		syscall.Dup2(int(logFile.Fd()), 1)
+		syscall.Dup2(int(logFile.Fd()), 2)
+	}
 }
 
 var buffer = make([][]byte, 0)
@@ -55,6 +62,7 @@ func main() {
 	discord.AddHandler(messageCreate)
 	// Register guildCreate as a callback for the guildCreate events.
 	discord.AddHandler(guildCreate)
+	discord.AddHandler(messageReactionAdd)
 
 	// Open a websocket connection to Discord and begin listening
 	err = discord.Open()
@@ -68,7 +76,6 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-
 	// Cleanly close down the discord session.
 	discord.Close()
 }
@@ -98,12 +105,43 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-
 	simpleReplyText := ParseCommand(m)
 
 	if simpleReplyText != "" && ShouldSend(c.GuildID) {
 		s.ChannelMessageSend(m.ChannelID, simpleReplyText)
 	}
+}
+
+//case func(*Session, *Disconnect):
+//return disconnectEventHandler(v)
+func messageReactionAdd(s *discordgo.Session, d *discordgo.MessageReactionAdd) {
+	if d.Emoji.Name == "🖕" {
+		message, err := s.ChannelMessage(d.ChannelID, d.MessageID)
+		if err != nil {
+			return
+		}
+		if message.Author.ID != s.State.User.ID {
+			// not for me!
+			return
+		}
+		user, usrerr := s.User(d.UserID)
+		// TODO refactor to shared code for channel cheking
+		// TODO add functionality for private messages
+		c, err := s.Channel(d.ChannelID)
+		if err != nil || usrerr != nil {
+			return
+		}
+
+		if !isOnDevelopmentServer(c.GuildID) && Debug {
+			// do not send messages when in development mode
+			return
+		}
+		if ShouldSend(c.GuildID) {
+			msg := "Χμ όχι και πολύ ευγενικό αυτό " + user.Mention() + " ε; :poop:"
+			s.ChannelMessageSend(d.ChannelID, msg)
+		}
+	}
+
 }
 
 // This function will be called every time a new guild is joined

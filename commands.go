@@ -94,6 +94,11 @@ func complexReply(m *discordgo.MessageCreate, c Command, operator string) (strin
 }
 
 func assembleGnText(m *discordgo.MessageCreate, c Command) string {
+	if ShouldSendGreeting(m.Author.ID, GOOD_NIGHT) {
+		StoreGreeting(m.Author.ID, GOOD_NIGHT)
+	} else {
+		return ""
+	}
 	h := time.Now().Hour()
 	if h >= 5 && h <= 21 {
 		// should I really say goodnight?
@@ -104,6 +109,11 @@ func assembleGnText(m *discordgo.MessageCreate, c Command) string {
 }
 
 func assembleGmText(m *discordgo.MessageCreate, c Command) string {
+	if ShouldSendGreeting(m.Author.ID, GOOD_MORNING) {
+		StoreGreeting(m.Author.ID, GOOD_MORNING)
+	} else {
+		return ""
+	}
 	h := time.Now().Hour()
 	if h >= 12 && h <= 23 {
 		// not really morning..
@@ -114,6 +124,11 @@ func assembleGmText(m *discordgo.MessageCreate, c Command) string {
 }
 
 func assembleGEText(m *discordgo.MessageCreate, c Command) string {
+	if ShouldSendGreeting(m.Author.ID, GOOD_EVENING) {
+		StoreGreeting(m.Author.ID, GOOD_EVENING)
+	} else {
+		return ""
+	}
 	h := time.Now().Hour()
 	if h >= 0 && h <= 11 {
 		// not really evening..
