@@ -26,7 +26,7 @@ func init() {
 	// Read the token from supplied file
 	Token = read(TokenFile)
 	DevSrvID = read("config") // TODO sloppy..
-	Version = "0.2.5"
+	Version = "0.2.6"
 	Debug = true
 
 	if Debug {

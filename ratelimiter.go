@@ -11,7 +11,7 @@ type SendEvent struct {
 }
 
 type UserGreeting struct {
-	greetings []Greeting
+	greetings []*Greeting
 }
 
 type Greeting struct {
@@ -108,7 +108,9 @@ func StoreGreeting(userId string, greetingType GreetingType) {
 
 	if !ok {
 		fmt.Println("No greeting for user")
-		greetings := []Greeting{{greetingType, time.Now().Unix()}}
+		greeting := &Greeting{greetingType, time.Now().Unix()}
+		greetings := make([]*Greeting, 5)
+		greetings[0] = greeting
 		userGreetings[userId] = &UserGreeting{greetings}
 		fmt.Printf("greetings now: %+v\n", userGreetings)
 		return
@@ -122,6 +124,6 @@ func StoreGreeting(userId string, greetingType GreetingType) {
 		}
 	}
 	fmt.Printf("Greetings before appending: %+v\n", userGreetings)
-	usergreeting.greetings = append(usergreeting.greetings, Greeting{greetingType, time.Now().Unix()})
+	usergreeting.greetings = append(usergreeting.greetings, &Greeting{greetingType, time.Now().Unix()})
 	fmt.Printf("Inserted new greeting: %+v\n", userGreetings)
 }
