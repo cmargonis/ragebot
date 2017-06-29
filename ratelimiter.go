@@ -87,7 +87,7 @@ func ShouldSendGreeting(userId string, greetingType GreetingType) bool {
 	// the greetings this user has used..
 	for _, greeting := range usergreeting.greetings {
 		fmt.Printf("iterating greetings %+v\n", greeting)
-		if greeting.greetingType == greetingType {
+		if greeting != nil && greeting.greetingType == greetingType {
 			lastSent := time.Unix(greeting.sent, 0)
 			// check if for today the user has interacted with the same greeting...
 			if time.Now().Day() == lastSent.Day() && time.Now().Month() == lastSent.Month() {
