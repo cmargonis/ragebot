@@ -86,13 +86,11 @@ func ShouldSendGreeting(userId string, greetingType GreetingType) bool {
 
 	// the greetings this user has used..
 	for _, greeting := range usergreeting.greetings {
-		fmt.Printf("iterating greetings %+v\n", greeting)
 		if greeting != nil && greeting.greetingType == greetingType {
 			lastSent := time.Unix(greeting.sent, 0)
 			// check if for today the user has interacted with the same greeting...
 			if time.Now().Day() == lastSent.Day() && time.Now().Month() == lastSent.Month() {
 				// there is a greeting for the given date
-				fmt.Println("A greeting already exists")
 				return false
 			} else {
 				return true
@@ -107,23 +105,20 @@ func StoreGreeting(userId string, greetingType GreetingType) {
 	usergreeting, ok := userGreetings[userId]
 
 	if !ok {
-		fmt.Println("No greeting for user")
 		greeting := &Greeting{greetingType, time.Now().Unix()}
 		greetings := make([]*Greeting, 5)
 		greetings[0] = greeting
 		userGreetings[userId] = &UserGreeting{greetings}
-		fmt.Printf("greetings now: %+v\n", userGreetings)
 		return
 	}
 
 	for _, greeting := range usergreeting.greetings {
-		if greeting.greetingType == greetingType {
+		if greeting != nil && greeting.greetingType == greetingType {
 			greeting.sent = time.Now().Unix()
 			fmt.Printf("Updated greeting: %+v\n", userGreetings)
 			return
 		}
 	}
-	fmt.Printf("Greetings before appending: %+v\n", userGreetings)
 	usergreeting.greetings = append(usergreeting.greetings, &Greeting{greetingType, time.Now().Unix()})
 	fmt.Printf("Inserted new greeting: %+v\n", userGreetings)
 }
