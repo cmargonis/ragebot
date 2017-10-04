@@ -26,8 +26,8 @@ func init() {
 	// Read the token from supplied file
 	Token = read(TokenFile)
 	DevSrvID = read("config") // TODO sloppy..
-	Version = "0.2.7"
-	Debug = true
+	Version = "0.2.8"
+	Debug = false
 
 	if Debug {
 		OwnName = "Ragequitter - Test"

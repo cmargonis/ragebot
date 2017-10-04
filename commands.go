@@ -21,9 +21,9 @@ func init() {
 
 	registerCommand("!help", "Αυτό το μήνυμα με οδηγίες", false, "", []string{"!βοήθεια", "!βοηθεια"})
 	registerCommand("!ping", "Απαντά με πόνγκ!", true, "Pong!", nil)
-	registerCommand("καλημέρα", "Το ευγενικό bot λέει και αυτό καλημέρα", false, "Καλημέρα %s :sunrise:", []string{"καλημερα", "καλημέρες", "καλημερες", "goodmorning"})
-	registerCommand("καλησπέρα", "Το ευγενικό bot λέει και αυτό καλησπέρα", false, "Καλησπέρα %s :city_sunset:", []string{"καλησπερα", "καλησπέρες", "καλησπερες"})
-	registerCommand("καληνύχτα", "Το ευγενικό bot λέει και αυτό καληνύχτα", false, "Καληνύχτα %s :last_quarter_moon_with_face: :night_with_stars:", []string{"καληνυχτα", "νυχτααα", "καληνύχτες", "goodnight"})
+	//registerCommand("καλημέρα", "Το ευγενικό bot λέει και αυτό καλημέρα", false, "Καλημέρα %s :sunrise:", []string{"καλημερα", "καλημέρες", "καλημερες", "goodmorning"})
+	//registerCommand("καλησπέρα", "Το ευγενικό bot λέει και αυτό καλησπέρα", false, "Καλησπέρα %s :city_sunset:", []string{"καλησπερα", "καλησπέρες", "καλησπερες"})
+	//registerCommand("καληνύχτα", "Το ευγενικό bot λέει και αυτό καληνύχτα", false, "Καληνύχτα %s :last_quarter_moon_with_face: :night_with_stars:", []string{"καληνυχτα", "νυχτααα", "καληνύχτες", "goodnight"})
 	registerCommand("!flip", "Όταν είσαι οργισμένος..", true, "(╯°□°）╯︵ ┻━┻", nil)
 	registerCommand("!review", "Search στα reviews.. επικίνδυνο..", false, "", nil)
 }
